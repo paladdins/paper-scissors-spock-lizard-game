@@ -1,0 +1,23 @@
+.welcome-container {
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+}
+.form-block {
+  display: flex;
+  align-items: center;
+  width: 500px;
+  margin-top: 10px;
+}
+.form-block button {
+  margin-left: 10px;
+}
+.form-block span {
+  margin-left: 5px;
+}
+.form-block input {
+  display: inline-block;
+  max-width: 350px;
+}

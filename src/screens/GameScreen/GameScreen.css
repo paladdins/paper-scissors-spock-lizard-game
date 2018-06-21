@@ -28,7 +28,7 @@
   background-size: cover !important;
   position: relative;
   transition: 0.1s;
-  bottom: 0;
+  transform: translateY(0);
   opacity: 1;
 }
 
@@ -37,7 +37,7 @@
 }
 
 .weapons:not(.disabled) div:hover {
-  bottom: 10px;
+  transform: translateY(-10px);
   padding-bottom: 10px;
 }
 

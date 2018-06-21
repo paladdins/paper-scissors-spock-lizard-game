@@ -1,6 +1,7 @@
 .chat-container {
   transition: 0.3s;
   position: fixed;
+  transform: translateY(0);
   bottom: 0;
   right: 200px;
   width: 300px;
@@ -8,7 +9,7 @@
 }
 
 .chat-container.closed {
-  bottom: -364px;
+  transform: translateY(364px);
 }
 
 .header {

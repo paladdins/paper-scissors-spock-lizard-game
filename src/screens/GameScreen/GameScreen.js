@@ -1,43 +1,16 @@
 import React, { Component } from "react";
 import Chat from "../../components/Chat/Chat";
+import { connect } from "react-redux";
+import { compose } from "redux";
+import { withRouter } from "react-router";
 import "./GameScreen.css";
 
 class GameScreen extends Component {
-  weapons = [
-    {
-      name: "rock",
-      style: {
-        background: "url(/images/rock.png)"
-      }
-    },
-    {
-      name: "paper",
-      style: {
-        background: "url(/images/paper.png)"
-      }
-    },
-    {
-      name: "spock",
-      style: {
-        background: "url(/images/spock.png)"
-      }
-    },
-    {
-      name: "lizard",
-      style: {
-        background: "url(/images/lizard.png)"
-      }
-    },
-    {
-      name: "scissors",
-      style: {
-        background: "url(/images/scissors.png)"
-      }
-    }
-  ];
-
   constructor(props) {
     super(props);
+
+    const { socket } = this.props;
+    this.weapons = this.props.weapons;
 
     this.hoverButtonSound = new Audio("/sound-effects/hover-weapon.mp3");
     this.selectButtonSound = new Audio("/sound-effects/select-weapon.mp3");
@@ -55,14 +28,13 @@ class GameScreen extends Component {
       enemyWeaponStyle: { backgroundImage: "" }
     };
 
-    const socket = this.props.socket;
-
-    socket.emit("join room", props.match.params.id);
-    socket.on("w8ing for another", () => this.w8foranouther());
+    socket.emit("join room", this.props.match.params.id);
+    socket.on("w8ing for another", () => this.w8foranother());
     socket.on("round result", msg => this.processResult(msg));
     socket.on("no such room", () => this.props.history.push("/"));
     socket.on("room is full", () => this.roomIsFull());
   }
+  componentWillMount() {}
 
   // Process redirect when room is already full
   roomIsFull() {
@@ -92,8 +64,8 @@ class GameScreen extends Component {
   }
 
   // If current user bet first
-  w8foranouther() {
-    this.setState({ headerstate: "w8foranouther" });
+  w8foranother() {
+    this.setState({ headerstate: "w8foranother" });
   }
 
   // Show round results
@@ -154,7 +126,7 @@ class GameScreen extends Component {
                     <h3>Choose your weapon</h3>
                   </React.Fragment>
                 );
-              case "w8foranouther":
+              case "w8foranother":
                 return <h3>Waiting another player's choice...</h3>;
               case "nextRoundTimer":
                 return <h3>Next round in {this.state.roundCountDown}</h3>;
@@ -232,4 +204,15 @@ class GameScreen extends Component {
   }
 }
 
-export default GameScreen;
+function mapStateToProps(state, otherProps = {}) {
+  return {
+    socket: state.webSocket,
+    weapons: state.weapons,
+    ...otherProps
+  };
+}
+
+export default compose(
+  withRouter,
+  connect(mapStateToProps)
+)(GameScreen);

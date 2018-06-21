@@ -1,8 +1,8 @@
 import React, { Component } from "react";
 import { Switch, Route, Redirect } from "react-router-dom";
-
-// socket-io client
-import OpenSocket from "socket.io-client";
+import { connect } from "react-redux";
+import { compose } from "redux";
+import { withRouter } from "react-router";
 
 // import screens
 import WelcomeScreen from "./screens/WelcomeScreen/WelcomeScreen";
@@ -11,13 +11,9 @@ import GameScreen from "./screens/GameScreen/GameScreen";
 // import styles
 import "./App.css";
 
-const socket = OpenSocket(
-  "http://" + window.location.host.split(":")[0] + ":7777"
-);
-
 class App extends Component {
-  constructor() {
-    super();
+  componentWillMount() {
+    const socket = this.props.socket;
 
     socket.on("the second has joined", msg => {});
   }
@@ -27,20 +23,22 @@ class App extends Component {
   render() {
     return (
       <Switch>
-        <Route
-          exact
-          path="/"
-          render={props => <WelcomeScreen {...props} socket={socket} />}
-        />
-        <Route
-          exact
-          path="/room/:id"
-          render={props => <GameScreen {...props} socket={socket} />}
-        />
+        <Route exact path="/" component={WelcomeScreen} />
+        <Route exact path="/room/:id" component={GameScreen} />
         <Redirect from="*" to="/" />
       </Switch>
     );
   }
 }
 
-export default App;
+function mapStateToProps(state, otherProps = {}) {
+  return {
+    socket: state.webSocket,
+    ...otherProps
+  };
+}
+
+export default compose(
+  withRouter,
+  connect(mapStateToProps)
+)(App);

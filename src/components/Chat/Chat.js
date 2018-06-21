@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import { FormControl, Button } from "react-bootstrap";
+import { connect } from "react-redux";
 
 import "./Chat.css";
 
@@ -161,4 +162,10 @@ class Chat extends Component {
   }
 }
 
-export default Chat;
+function mapStateToProps(state) {
+  return {
+    socket: state.webSocket
+  };
+}
+
+export default connect(mapStateToProps)(Chat);

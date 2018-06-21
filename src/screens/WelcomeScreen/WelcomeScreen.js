@@ -1,5 +1,8 @@
 import React, { Component } from "react";
 import { CopyToClipboard } from "react-copy-to-clipboard";
+import { connect } from "react-redux";
+import { compose } from "redux";
+import { withRouter } from "react-router";
 import "./WelcomeScreen.css";
 
 import { Button, FormControl } from "react-bootstrap";
@@ -26,6 +29,8 @@ class WelcomeScreen extends Component {
 
     socket.emit("create room");
   }
+
+  componentWillMount() {}
 
   // Create room and get the invitation link
   createRoomLink(msg) {
@@ -66,4 +71,14 @@ class WelcomeScreen extends Component {
   }
 }
 
-export default WelcomeScreen;
+function mapStateToProps(state, otherProps = {}) {
+  return {
+    socket: state.webSocket,
+    ...otherProps
+  };
+}
+
+export default compose(
+  withRouter,
+  connect(mapStateToProps)
+)(WelcomeScreen);

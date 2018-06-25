@@ -53,15 +53,12 @@ class Chat extends Component {
 
     const socket = this.props.socket;
 
-    console.log(this.props.chat.textInput);
-
     socket.emit("chat text", this.props.chat.textInput);
 
     this.props.sendMessage();
   }
 
   receiveMsg(msg) {
-    console.log(msg);
     this.playSoundOnText();
 
     this.props.receiveMessage(msg);

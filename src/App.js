@@ -3,6 +3,10 @@ import { Switch, Route, Redirect } from "react-router-dom";
 import { connect } from "react-redux";
 import { compose } from "redux";
 import { withRouter } from "react-router";
+import { addSocket } from "./actions/create-socket";
+
+// socket-io client
+import OpenSocket from "socket.io-client";
 
 // import screens
 import WelcomeScreen from "./screens/WelcomeScreen/WelcomeScreen";
@@ -13,7 +17,11 @@ import "./App.css";
 
 class App extends Component {
   componentWillMount() {
-    const socket = this.props.socket;
+    const socket = OpenSocket(
+      "http://" + window.location.host.split(":")[0] + ":7777"
+    );
+
+    this.props.addSocket(socket);
 
     socket.on("the second has joined", msg => {});
   }
@@ -40,5 +48,8 @@ function mapStateToProps(state, otherProps = {}) {
 
 export default compose(
   withRouter,
-  connect(mapStateToProps)
+  connect(
+    mapStateToProps,
+    { addSocket }
+  )
 )(App);

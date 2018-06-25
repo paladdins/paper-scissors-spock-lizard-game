@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { FormControl, Button } from "react-bootstrap";
 import { connect } from "react-redux";
+import * as ChatActionCreators from "../../actions/chat-actions";
 
 import "./Chat.css";
 
@@ -13,7 +14,7 @@ class Chat extends Component {
 
     const socket = this.props.socket;
 
-    socket.on("text message", msg => this.newMsg(msg));
+    socket.on("text message", msg => this.receiveMsg(msg));
 
     this.state = {
       chatClosed: true,
@@ -28,35 +29,16 @@ class Chat extends Component {
     this.chatTextSound = new Audio("/sound-effects/chat-text-sound.mp3");
   }
 
-  // Render new list
-  updateChatList(msgs) {
-    this.chatMessagesJsx = msgs.map((el, index) => {
-      return (
-        <div key={index} className={el.own ? "message" : "enemy message"}>
-          <div className="message-inner">{el.text}</div>
-        </div>
-      );
-    });
-
-    this.scrollDownChatBody();
-  }
-
   // Scroll to last message
   scrollDownChatBody() {
-    console.log(this.chatContainerRef);
     const scrollHeight = this.chatContainerRef.current.scrollHeight;
     const height = this.chatContainerRef.current.clientHeight;
     const scrollMax = scrollHeight - height + 150;
     this.chatContainerRef.current.scrollTop = scrollMax > 0 ? scrollMax : 0;
   }
 
-  changeTextInput(e) {
-    const input = e.target.value;
-    this.setState({ textInput: input });
-  }
-
   playSoundOnText() {
-    this.state.chatClosed
+    this.props.chat.closed
       ? this.closedChatTextSound.play()
       : this.chatTextSound.play();
   }
@@ -64,84 +46,53 @@ class Chat extends Component {
   // Messages sent from current user
   sendTextMessage(e) {
     e.preventDefault();
-    if (!this.state.textInput.trim()) {
+    if (!this.props.chat.textInput.trim()) {
       return;
     }
     this.playSoundOnText();
 
     const socket = this.props.socket;
-    const newMessage = {
-      own: true,
-      text: this.state.textInput
-    };
 
-    socket.emit("chat text", this.state.textInput);
+    console.log(this.props.chat.textInput);
 
-    this.setState(prevState => {
-      const msgs = [...prevState.chatMessages, newMessage];
-      this.updateChatList(msgs);
+    socket.emit("chat text", this.props.chat.textInput);
 
-      return {
-        chatMessages: msgs,
-        textInput: ""
-      };
-    });
+    this.props.sendMessage();
   }
 
-  // Messages received from socket.io
-  newMsg(msg) {
+  receiveMsg(msg) {
+    console.log(msg);
     this.playSoundOnText();
-    const newMessage = {
-      own: false,
-      text: msg
-    };
 
-    this.setState(prevState => {
-      const msgs = [...prevState.chatMessages, newMessage];
-      this.updateChatList(msgs);
-
-      // if chat is closed, increment unread counter
-      const unreadCounter = prevState.chatClosed
-        ? prevState.unreadCounter + 1
-        : prevState.unreadCounter;
-
-      return {
-        chatMessages: [...prevState.chatMessages, newMessage],
-        textInput: "",
-        unreadCounter: unreadCounter
-      };
-    });
-  }
-
-  // Open-close chat
-  toggleChat() {
-    if (this.state.chatClosed) {
-      this.setState({ unreadCounter: 0 });
-    }
-    this.setState(prev => {
-      return {
-        chatClosed: !prev.chatClosed
-      };
-    });
+    this.props.receiveMessage(msg);
   }
 
   render() {
     return (
       <div
         className={
-          this.state.chatClosed ? "chat-container closed" : "chat-container"
+          this.props.chat.closed ? "chat-container closed" : "chat-container"
         }
       >
-        <div onClick={() => this.toggleChat()} className="header">
+        <div onClick={() => this.props.toggleChat()} className="header">
           <div className="name">Chat</div>
 
-          {this.state.unreadCounter > 0 ? (
-            <div className="unread">{this.state.unreadCounter}</div>
+          {this.props.chat.unreadCounter > 0 ? (
+            <div className="unread">{this.props.chat.unreadCounter}</div>
           ) : null}
         </div>
         <div ref={this.chatContainerRef} className="chat-body">
           <div ref={this.chatMessageList} className="message-list">
-            {this.chatMessagesJsx}
+            {this.props.chat.messages.map((el, index) => {
+              return (
+                <div
+                  key={index}
+                  className={el.own ? "message" : "enemy message"}
+                >
+                  <div className="message-inner">{el.text}</div>
+                </div>
+              );
+            })}
           </div>
         </div>
         <div className="text-input">
@@ -149,8 +100,8 @@ class Chat extends Component {
             <FormControl
               type="text"
               placeholder="Enter your message here"
-              onChange={e => this.changeTextInput(e)}
-              value={this.state.textInput}
+              onChange={e => this.props.typeMessage(e)}
+              value={this.props.chat.textInput}
             />
             <Button bsStyle="primary" bsSize="small" type="submit">
               Submit
@@ -164,8 +115,12 @@ class Chat extends Component {
 
 function mapStateToProps(state) {
   return {
-    socket: state.webSocket
+    socket: state.webSocket,
+    chat: state.chat
   };
 }
 
-export default connect(mapStateToProps)(Chat);
+export default connect(
+  mapStateToProps,
+  ChatActionCreators
+)(Chat);

@@ -31,10 +31,13 @@ class Chat extends Component {
   }
 
   playSoundOnText() {
-    this.props.chat.closed
-      ? ((this.closedChatTextSound.currentTime = 0),
-        this.closedChatTextSound.play())
-      : ((this.chatTextSound.currentTime = 0), this.chatTextSound.play());
+    if (this.props.chat.closed) {
+      this.closedChatTextSound.currentTime = 0;
+      this.closedChatTextSound.play();
+    } else {
+      this.chatTextSound.currentTime = 0;
+      this.chatTextSound.play();
+    }
   }
 
   // Messages sent from current user

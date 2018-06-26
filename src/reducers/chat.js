@@ -5,24 +5,27 @@ const initialState = {
   closed: true
 };
 
+const toggleChat = ({ closed, unreadCounter, ...state }) => ({
+  ...state,
+  closed: !closed,
+  unreadCounter: closed ? 0 : unreadCounter
+});
+
+const sendMessage = ({ messages, textInput, ...state }) => ({
+  ...state,
+  textInput: "",
+  messages: messages.concat({
+    own: true,
+    text: textInput
+  })
+});
+
 export default function(state = initialState, action) {
   switch (action.type) {
     case "TOGGLE_CHAT":
-      return Object.assign({}, state, {
-        closed: !state.closed,
-        unreadCounter: state.closed ? 0 : state.unreadCounter
-      });
+      return toggleChat(state);
     case "SEND_MESSAGE":
-      return Object.assign({}, state, {
-        textInput: "",
-        messages: [
-          ...state.messages,
-          {
-            own: true,
-            text: state.textInput
-          }
-        ]
-      });
+      return sendMessage(state);
     case "RECEIVE_MESSAGE":
       return Object.assign({}, state, {
         unreadCounter: state.closed ? state.unreadCounter + 1 : 0,

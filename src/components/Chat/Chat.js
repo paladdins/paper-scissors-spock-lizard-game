@@ -16,13 +16,6 @@ class Chat extends Component {
 
     socket.on("text message", msg => this.receiveMsg(msg));
 
-    this.state = {
-      chatClosed: true,
-      chatMessages: [],
-      textInput: "",
-      unreadCounter: 0
-    };
-
     this.closedChatTextSound = new Audio(
       "/sound-effects/closed-chat-text-sound.mp3"
     );
@@ -39,8 +32,9 @@ class Chat extends Component {
 
   playSoundOnText() {
     this.props.chat.closed
-      ? this.closedChatTextSound.play()
-      : this.chatTextSound.play();
+      ? ((this.closedChatTextSound.currentTime = 0),
+        this.closedChatTextSound.play())
+      : ((this.chatTextSound.currentTime = 0), this.chatTextSound.play());
   }
 
   // Messages sent from current user
@@ -50,17 +44,13 @@ class Chat extends Component {
       return;
     }
     this.playSoundOnText();
-
     const socket = this.props.socket;
-
     socket.emit("chat text", this.props.chat.textInput);
-
     this.props.sendMessage();
   }
 
   receiveMsg(msg) {
     this.playSoundOnText();
-
     this.props.receiveMessage(msg);
   }
 

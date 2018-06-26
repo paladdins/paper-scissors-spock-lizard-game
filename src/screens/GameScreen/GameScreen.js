@@ -6,6 +6,7 @@ import { withRouter } from "react-router";
 import "./GameScreen.css";
 
 class GameScreen extends Component {
+  compo;
   constructor(props) {
     super(props);
 
@@ -47,6 +48,7 @@ class GameScreen extends Component {
     if (this.state.yourWeaponChosen) {
       return;
     }
+    this.selectButtonSound.currentTime = 0;
     this.selectButtonSound.play();
 
     this.setState({ weaponChosen: true, showStats: true });
@@ -110,6 +112,7 @@ class GameScreen extends Component {
     if (this.state.yourWeaponChosen) {
       return;
     }
+    this.hoverButtonSound.currentTime = 0;
     this.hoverButtonSound.play();
   }
 
